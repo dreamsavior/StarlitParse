@@ -2378,6 +2378,51 @@ impl Serialize for UDataTable {
     }
 }
 
+#[derive(Debug)]
+pub struct UImalVersionizedDataTable {
+    super_object: UObject,
+    rows: Vec<(String, UObject)>,
+}
+
+impl PackageExport for UImalVersionizedDataTable {
+    fn get_export_type(&self) -> &str {
+        "ImalVersionizedDataTable"
+    }
+}
+
+impl UImalVersionizedDataTable {
+    fn new(reader: &mut ReaderCursor, name_map: &NameMap, import_map: &ImportMap) -> ParserResult<Self> {
+        let super_object = UObject::new(reader, name_map, import_map, "RowStruct")?;
+        let num_rows = reader.read_i32::<LittleEndian>()?;
+
+        let mut rows = Vec::new();
+
+        for _i in 0..num_rows {
+            let row_name = read_fname(reader, name_map)?;
+            let row_object = UObject {
+                properties: UObject::serialize_properties(reader, name_map, import_map)?,
+                export_type: "RowStruct".to_owned(),
+            };
+            rows.push((row_name, row_object));
+        }
+
+        Ok(Self {
+            super_object, rows,
+        })
+    }
+}
+
+impl Serialize for UImalVersionizedDataTable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        let mut map = serializer.serialize_map(Some((self.rows.len() + 1) as usize))?;
+        map.serialize_entry("export_type", "ImalVersionizedDataTable")?;
+        for e in &self.rows {
+            map.serialize_entry(&e.0, &e.1)?;
+        }
+        map.end()
+    }
+}
+
 #[derive(Debug, Serialize)]
 enum ECurveTableMode {
     Empty,
@@ -2501,6 +2546,7 @@ impl Package {
             let export: Box<dyn Any> = match export_type.as_ref() {
                 "Texture2D" => Box::new(Texture2D::new(&mut cursor, &name_map, &import_map, asset_length, export_size, &mut ubulk_cursor)?),
                 "DataTable" => Box::new(UDataTable::new(&mut cursor, &name_map, &import_map)?),
+                "ImalVersionizedDataTable" => Box::new(UImalVersionizedDataTable::new(&mut cursor, &name_map, &import_map)?),
                 "SkeletalMesh" => Box::new(USkeletalMesh::new(&mut cursor, &name_map, &import_map)?),
                 "AnimSequence" => Box::new(UAnimSequence::new(&mut cursor, &name_map, &import_map)?),
                 "Skeleton" => Box::new(USkeleton::new(&mut cursor, &name_map, &import_map)?),
@@ -2610,6 +2656,9 @@ fn get_export(export: &Box<dyn Any>) -> Option<&dyn PackageExport> {
     }
     if let Some(texture) = export.downcast_ref::<Texture2D>() {
         return Some(texture);
+    }
+    if let Some(imaltable) = export.downcast_ref::<UImalVersionizedDataTable>() {
+        return Some(imaltable);
     }
     if let Some(table) = export.downcast_ref::<UDataTable>() {
         return Some(table);
