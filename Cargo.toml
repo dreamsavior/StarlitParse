@@ -1,8 +1,8 @@
 [package]
-name = "john-wick-parse"
-version = "5.0.2"
+name = "starlit-parse"
+version = "1.0.0"
 authors = ["Waddlesworth <github@genj.io>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 byteorder = "1.2"
