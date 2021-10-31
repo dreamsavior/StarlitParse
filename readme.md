@@ -1,4 +1,6 @@
-## Fortnite Asset Parser
+## Starlit Season Asset Parser
+
+Fork of [SirWaddles/JohnWickParse](https://github.com/SirWaddles/JohnWickParse) with `ImalVersionizedDataTable` support (used in THE IDOLM@STER STARLIT SEASON).
 
 This program is able to parse pak, uexp and uasset files, and offers way to manage them.
 
