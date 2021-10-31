@@ -51,7 +51,8 @@ fn serialize(params: &[String]) -> CommandResult {
 
     let package = assets::Package::from_file(path)?;
     let serial_package = serde_json::to_string_pretty(&package).unwrap();
-    let mut file = fs::File::create(path.to_owned() + ".json").unwrap();
+    let spath = path.to_owned().replace(".uasset", "").replace(".uexp", "").replace(".ubulk", "");
+    let mut file = fs::File::create(spath + ".json").unwrap();
     file.write_all(serial_package.as_bytes()).unwrap();
 
     Ok(())
