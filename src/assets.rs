@@ -2571,12 +2571,14 @@ impl Package {
     }
 
     pub fn from_file(file_path: &str) -> ParserResult<Self> {
-        let asset_file = file_path.to_owned() + ".uasset";
-        let uexp_file = file_path.to_owned() + ".uexp";
-        let ubulk_file = file_path.to_owned() + ".ubulk";
+        let sfile_path = file_path.replace(".uasset", "").replace(".uexp", "").replace(".ubulk", "");
+    
+        let asset_file = sfile_path.to_owned() + ".uasset";
+        let uexp_file = sfile_path.to_owned() + ".uexp";
+        let ubulk_file = sfile_path.to_owned() + ".ubulk";
 
         // read asset file
-        let mut asset = File::open(asset_file).map_err(|_v| ParserError::new(format!("Could not find file: {}", file_path)))?;
+        let mut asset = File::open(asset_file).map_err(|_v| ParserError::new(format!("Could not find file: {}", sfile_path)))?;
         let mut uasset_buf = Vec::new();
         asset.read_to_end(&mut uasset_buf)?;
 
